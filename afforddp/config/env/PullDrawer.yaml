@@ -1,0 +1,91 @@
+num_demos: 30
+SAVE_RENDER: True
+USE_CUROBO: True
+HEADLESS: False
+SAVE_ROOT: "output/gym_test"
+USE_MESH_COLLISION: True
+steps: 1000
+num_envs: 1
+env_spacing: 1.0
+controller: curobo
+pos_dist_bar: 0.10
+rot_dist_bar: 15
+num_obs: 4096
+num_states: 23
+num_actions: 9
+sim:
+  use_gpu_pipeline: True
+  sim_device: 'cuda'
+  compute_device_id: 0
+  graphics_device_id: 0
+  physics_engine: physx
+# cam
+cam:
+  use_cam: True
+  cam_w: 1080 # 1080
+  cam_h: 720 # 720
+  cam_far_plane: 100
+  cam_near_plane: 0.1
+  cam_horizontal_fov: 75 # pixel
+  cam_poss: # small table
+    - [-0.6, 1.0, 1.5]
+  cam_targets: 
+    - [0.2, 0.0, 0.4]
+  point_cloud_bound:
+    - [-2, 2]
+    - [-2, 2]
+    - [0.1, 2.0]
+  sampling_method: random_fps # random_fps, random, fps
+  sampling_num: 20000
+
+asset:
+  asset_root: assets
+  rigid:
+
+    # asset_files: 
+    #   # - urdf/ycb/025_mug/025_mug.urdf
+    #   # - urdf/ycb/010_potted_meat_can/010_potted_meat_can.urdf
+    #   # - urdf/ycb/011_banana/011_banana.urdf
+    # obj_pose_ps: # small table
+    #   - [0.5, 0, 0.4]
+    #   - [0.5, 0, 0.4]
+    #   - [0.5, 0, 0.4]
+    # position_noise: [0.2, 0.25] # meter # small table
+
+    # rotation_noise: 15 # degree
+    # asset_seg_ids: 
+    #   - 2
+    #   - 3
+    #   - 4
+    # obj_scale: 0.8
+
+  arti:
+    arti_obj_root: partnet_mobility_part
+    arti_gapartnet_ids: 
+      - 27044
+    arti_obj_pose_ps: 
+      - [0.6, 0.1, 0.6]
+    arti_reset_position_noise: 0.01
+    arti_reset_rotation_noise: 0.0 #collect_data = 0.05 | eval = 0.02  
+    arti_obj_scale: 0.5 
+    arti_rotation: 0
+    arti_seg_id: 4
+    arti_pos_low: [0.55, 0, 0.72]
+    arti_pos_upper: [0.60, 0.1, 0.80]
+
+  table:
+    table_pose_p: [0.7, 0, 0.01]
+    table_scale: [1.2, 2, 0.02]
+    table_seg_id: 3
+
+  robot:
+    franka_asset_file: urdf/franka_description/robots/franka_panda.urdf
+    franka_pose_p: [-0.08, 0, 0] 
+    franka_seg_id: 5
+    franka_reset_position_noise: 0.025
+    franka_reset_rotation_noise: 0.025
+    franka_reset_dof_pos_interval: 0.0 
+    franka_init_dof: [1.157, -1.066, -0.155, -2.239, -1.841, 1.003, 0.469]
+
+    franka_pos_low: [-0.1, 0, 0]
+    franka_pos_upper: [-0.08, 0, 0]

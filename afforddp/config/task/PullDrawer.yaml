@@ -1,0 +1,41 @@
+name: PullDrawer_dynamic_afford
+
+task_name: 
+
+shape_meta: &shape_meta
+  # acceptable types: rgb, low_dim
+  obs:
+    point_cloud:
+      shape: [4096, 3]
+      type: point_cloud
+    state:
+      shape: [23]
+      type: low_dim
+  afford:
+    shape: [8,3]
+    type: low_dim
+  action:
+    shape: [9]
+
+env_runner:
+  _target_: afforddp.env_runner.DrawerManip_runner.DrawerManipRunner
+  n_eval: 10
+  max_steps: 30
+  n_obs_steps: ${n_obs_steps}
+  n_action_steps: ${n_action_steps}
+  affordance: True
+  dynamic_affordance: True
+  task_name: PullDrawer
+  memory_path: /home/user/Downloads/NAS/GeneralDP/sim/multiple_object_sim
+  rl_device: 'cuda'
+  config_path: afforddp/config/env/PullDrawer.yaml
+
+dataset:
+  _target_: afforddp.dataset.Cabinet_afford_dataset.CabinetManipAffordDataset
+  zarr_path: record/PullDrawer/PullDrawer_expert_0.zarr
+  horizon: ${horizon}
+  pad_before: ${eval:'${n_obs_steps}-1'}
+  pad_after: ${eval:'${n_action_steps}-1'}
+  seed: 42
+  val_ratio: 0.00
+  max_train_episodes: 90

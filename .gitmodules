@@ -1,0 +1,9 @@
+[submodule "third_party/curobo"]
+	path = third_party/curobo
+	url = https://github.com/NVlabs/curobo.git
+[submodule "third_party/pytorch3d"]
+	path = third_party/pytorch3d
+	url = https://github.com/facebookresearch/pytorch3d.git
+[submodule "third_party/Grounded-Segment-Anything"]
+	path = third_party/Grounded-Segment-Anything
+	url = https://github.com/IDEA-Research/Grounded-Segment-Anything.git
