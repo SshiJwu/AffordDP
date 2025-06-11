@@ -7,3 +7,6 @@
 [submodule "third_party/Grounded-Segment-Anything"]
 	path = third_party/Grounded-Segment-Anything
 	url = https://github.com/IDEA-Research/Grounded-Segment-Anything.git
+[submodule "third_party/Point_SAM"]
+	path = third_party/Point_SAM
+	url = https://github.com/zyc00/Point-SAM
