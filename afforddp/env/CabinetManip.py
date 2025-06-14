@@ -320,7 +320,6 @@ class CabinetManipEnv():
             self.gapart_cates.append([anno_i["category"] for anno_i in gapart_raw_valid_anno])
             self.gapart_init_bboxes.append(np.array([np.asarray(anno_i["bbox"]) for anno_i in gapart_raw_valid_anno]))
             self.gapart_link_names.append([anno_i["link_name"] for anno_i in gapart_raw_valid_anno])
-        # print()
 
     def prepare_franka_asset(self):
         '''
@@ -385,7 +384,6 @@ class CabinetManipEnv():
         # get link index of panda hand, which we will use as end effector
         franka_link_dict = self.gym.get_asset_rigid_body_dict(self.franka_asset)
         self.franka_num_links = len(franka_link_dict)
-        # print("franka dof:", self.franka_num_dofs, "franka links:", self.franka_num_links)
         self.franka_hand_index = franka_link_dict["panda_hand"]
 
     def prepare_table(self):
@@ -460,7 +458,6 @@ class CabinetManipEnv():
         self.arti_obj_num_dofs = self.gym.get_asset_dof_count(self.arti_obj_asset)
         arti_obj_link_dict = self.gym.get_asset_rigid_body_dict(self.arti_obj_asset)
         self.arti_obj_num_links = len(arti_obj_link_dict)
-        # print("obj dof:", self.arti_obj_num_dofs, "obj links:", self.arti_obj_num_links)
         
         # set physical props
         self.arti_obj_dof_props = self.gym.get_asset_dof_properties(self.arti_obj_asset)
@@ -547,7 +544,6 @@ class CabinetManipEnv():
                 self.gym.set_actor_dof_states(env, franka_handle, self.franka_default_dof_state, gymapi.STATE_ALL)
 
                 # set initial position targets
-                # print(self.franka_default_dof_pos)
                 self.gym.set_actor_dof_position_targets(env, franka_handle, self.franka_default_dof_pos)
 
                 # get inital hand pose
@@ -770,10 +766,7 @@ class CabinetManipEnv():
         # get dof state tensor
         _dof_states = self.gym.acquire_dof_state_tensor(self.sim)
         self.dof_states = gymtorch.wrap_tensor(_dof_states)
-        # print("init:",self.dof_states)
-        # self.gym.refresh_dof_state_tensor(self.sim)
-        # print("refresh:",self.dof_states)
-       
+
         num_dof = int(self.dof_states.shape[0]/self.num_envs)
     
         self.dof_pos = self.dof_states[:, 0].view(self.num_envs, num_dof, 1)
@@ -898,7 +891,6 @@ class CabinetManipEnv():
                 points_envs.append(points_env)
                 colors_envs.append(colors_env)
                 masks_envs.append(masks_env)
-                # print("Time to get point cloud: ", e-s)
 
             self.gym.end_access_image_tensors(self.sim)
 
@@ -937,14 +929,6 @@ class CabinetManipEnv():
                     fname = os.path.join(save_dir, f"{save_name}-partial-point_cloud--{env_i}-{cam_i}.ply")
                     o3d.io.write_point_cloud(fname, point_cloud)
 
-            # o3d.visualization.draw_geometries([point_cloud])
-            # if points is not None and save_pc:
-            #     point_cloud = o3d.geometry.PointCloud()
-            #     point_cloud.points = o3d.utility.Vector3dVector(points[env_i][:, :3])
-            #     point_cloud.colors = o3d.utility.Vector3dVector(colors[env_i][:, :3]/255.0)
-            #     # save_to ply
-            #     fname = os.path.join(save_dir, f"{save_name}-{env_i}-all-point_cloud.ply")
-            #     o3d.io.write_point_cloud(fname, point_cloud)
 
     def record_frames(self,path):
         
@@ -994,7 +978,6 @@ class CabinetManipEnv():
         effort_action = torch.zeros_like(pos_action)
         #import pdb; pdb.set_trace()
         for step_i in range(len(traj)):
-            # print("Step: ", step_i)
             # Deploy actions
             pos_action[:, :7] = traj.position.reshape(-1, 7)[step_i]
             if close_gripper:
@@ -1014,7 +997,6 @@ class CabinetManipEnv():
             # save state and video
             if save_video:
                 self.gym.render_all_camera_sensors(self.sim)
-                # print("Saving video frame:", start_step + step_i)
                 step_str = str(start_step + step_i).zfill(4)
                 os.makedirs(f"{save_root}/video", exist_ok=True)
                 self.gym.write_camera_image_to_file(self.sim, self.envs[0], self.cams[0][0], gymapi.IMAGE_COLOR, f"{save_root}/video/step-{step_str}.png")
@@ -1037,40 +1019,6 @@ class CabinetManipEnv():
                                                                init_position=self.init_position,
                                                                franka_init_pose=franka_init_pose)
             
-            # point_cloud = o3d.geometry.PointCloud()
-            # point_cloud.points = o3d.utility.Vector3dVector(points_envs[0][:, :3])
-            # point_cloud.colors = o3d.utility.Vector3dVector(colors_envs[0][:, :3]/255.0)
-            # # save_to ply
-            # fname = os.path.join(save_root, f"point_cloud_{step_str}.ply")
-            # o3d.io.write_point_cloud(fname, point_cloud)
-
-            # franka_dof_pos = self.dof_states[]
-
-
-            # color_mapping = {
-            # 0: [255, 0, 0],   # 红色
-            # 1: [255, 0, 0],   # 绿色
-            # 2: [255, 0, 0],   # 蓝色
-            # 3: [255, 0, 0], # 青色
-            # 4: [255, 0, 0], # 紫色
-            # 5: [0, 255, 255]  # 黄色
-            # }
-            # color_mask = np.zeros((seg_envs[0][0].shape[0], seg_envs[0][0].shape[1], 3), dtype=np.uint8)
-
-            # for seg_id, color in color_mapping.items():
-            #     color_mask[seg_envs[0][0] == seg_id] = color
-            # cv2.imwrite(os.path.join(save_root, f"{step_str}.png"),color_mask)
-
-            # pc = points_envs[0][:, :3]
-            # color = colors_envs[0][:, :3]
-            # mask = masks_envs[0][:,:]
-            # idx = (mask[:,0]==4)
-            # robot_pc = pc[idx]
-            # robot_color = color[idx]
-            # pc_ = o3d.geometry.PointCloud()
-            # pc_.points = o3d.utility.Vector3dVector(robot_pc)
-            # pc_.colors = o3d.utility.Vector3dVector(robot_color/255.0)
-            # o3d.io.write_point_cloud('robot.ply', pc_)
 
     def move_gripper(self, close_gripper = True, save_video = False, save_root = "", start_step = 0):
         pos_action = torch.zeros_like(self.dof_pos).squeeze(-1)
@@ -1093,7 +1041,6 @@ class CabinetManipEnv():
         
         if save_video:
             self.gym.render_all_camera_sensors(self.sim)
-            # print("Saving video frame:", start_step)
             # start_step string, 4 digit
             step_str = str(start_step).zfill(4)
             os.makedirs(f"{save_root}/video", exist_ok=True)
@@ -1128,7 +1075,6 @@ class CabinetManipEnv():
     def control_to_pose(self, pose, close_gripper = True, save_video = False, save_root = "", step_num = 0, use_ik = False, start_qpos = None):
         # move to pre-grasp
         self.refresh_observation()
-        # print("control:",self.franka_pos)
         USE_IK_CONTROL = use_ik
         if USE_IK_CONTROL:
             self.plan_to_pose_ik(
@@ -1296,7 +1242,7 @@ class CabinetManipEnv():
                 # self.intervaledRandom_(cabinet_reset_pos_tensor, self.arti_reset_position_noise)
                 # self.intervaledRandom_(cabinet_reset_rot_tensor, self.arti_reset_rotation_noise)
                 self.cabinet_reset_pos_tensor = cabinet_reset_pos_tensor
-                print(cabinet_reset_pos_tensor)
+                
 
                 self.arti_reset_obj_pos_list.append(cabinet_reset_pos_tensor.cpu().detach().tolist())
                 self.arti_reset_obj_rot_list.append(cabinet_reset_rot_tensor.cpu().detach().tolist())
@@ -1308,7 +1254,6 @@ class CabinetManipEnv():
                 reseted = True
         
         if reseted :
-            # print("reset:",self.init_dof_states)
 
             self.gym.set_dof_state_tensor(
                 self.sim,
@@ -1319,7 +1264,7 @@ class CabinetManipEnv():
                 gymtorch.unwrap_tensor(self.root_states)
             )
             self.gym.refresh_dof_state_tensor(self.sim)
-            # print("after_reset",self.dof_states)
+
 
     def reset(self, to_reset = "all") :
 
@@ -1380,7 +1325,7 @@ class CabinetManipEnv():
     def _perform_actions(self, actions):
 
         actions = actions.to(self.device)
-        # print(actions)
+
         
         pos_action = torch.zeros_like(self.dof_pos).squeeze(-1)
         effort_action = torch.zeros_like(pos_action)
@@ -1404,7 +1349,6 @@ class CabinetManipEnv():
         rot_dist = pdist(current_part_rot, self.init_part_rot)
         success = (pos_dist > self.pos_dist_bar) | (rot_dist > self.rot_dist_bar)
 
-        # print(success)
         return success
 
     def intervaledRandom_(self, tensor, dist, lower=None, upper=None) :
@@ -1528,8 +1472,11 @@ class CabinetManipEnv():
                                         close_gripper = True, save_video = save_video, save_root = save_root, step_num = step_num, use_ik = False)
                     if traj == None:
                         return 0
-                
-            return 1
+            
+            if self._success():
+                return 1
+            else: 
+                return 0
     
 
     def transform_bbox(self, link_name='link_1'):

@@ -76,7 +76,9 @@ def process_data(data_dir=None, save_dir=None, save_name=None, vis=False):
             state_array = []
             action_array = []
             point_array = []
+            raw_point_array = []
             mask_array = []
+            raw_mask_array = []
             afford_ = []
             afford_array = []
             img_array = []
@@ -110,7 +112,8 @@ def process_data(data_dir=None, save_dir=None, save_name=None, vis=False):
                         robot_qpos = state[0][-9:]
                         afford = forward_kinematics(robot_qpos, np.array(pose[:3]), dist=-0.02)
                         afford_.append(afford.reshape(1,-1))
-                    point, mask = sample_point_cloud(point, mask, 4096)
+                    downsample_point, dowmsample_mask = sample_point_cloud(point, mask, 4096)
+                    raw_point, raw_mask = sample_point_cloud(point, mask, 80000)
 
                     img_file = f'step-{str(id).zfill(4)}.png'
                     original_image = Image.open(os.path.join(data_root_abs,data_dir,'video',img_file))
@@ -122,8 +125,10 @@ def process_data(data_dir=None, save_dir=None, save_name=None, vis=False):
                     state_array.append(state)
                     init_pos_array.append(init_pos.reshape(1,-1))
                     action_array.append(action)
-                    point_array.append(point[np.newaxis,:,:])
-                    mask_array.append(mask[np.newaxis,:,:])
+                    point_array.append(downsample_point[np.newaxis,:,:])
+                    raw_point_array.append(raw_point[np.newaxis,:,:])
+                    mask_array.append(dowmsample_mask[np.newaxis,:,:])
+                    raw_mask_array.append(raw_mask[np.newaxis,:,:])
                     img_array.append(img[np.newaxis,:,:,:])
                     pose_array.append(pose.reshape(1,-1))
 
@@ -131,13 +136,15 @@ def process_data(data_dir=None, save_dir=None, save_name=None, vis=False):
             state_array = np.concatenate(state_array,axis=0)
             action_array = np.concatenate(action_array,axis=0)
             point_array = np.concatenate(point_array,axis=0)
+            raw_point_array = np.concatenate(raw_point_array, axis=0)
             mask_array = np.concatenate(mask_array,axis=0)
+            raw_mask_array = np.concatenate(raw_mask_array,axis=0)
             img_array = np.concatenate(img_array,axis=0)
             init_pos_array = np.concatenate(init_pos_array, axis=0)
             pose_array = np.concatenate(pose_array,axis=0)
 
             afford_ = np.concatenate(afford_, axis=0)
-            afford_ = uniform_sampling(afford_, num=8)[np.newaxis,:,:]
+            afford_ = uniform_sampling(afford_, num=32)[np.newaxis,:,:]
 
             if vis:
                 afford_color = np.zeros_like(afford_[0])
@@ -147,6 +154,13 @@ def process_data(data_dir=None, save_dir=None, save_name=None, vis=False):
                 vis_point_cloud(pc, f"{data_root_abs}/{data_dir}/pc_afford")
 
             afford_array = np.repeat(afford_, len(state_array),axis=0)
+            np.savez(f"{data_root_abs}/{data_dir}.npz", state = state_array,
+                        action = action_array,
+                        raw_point = raw_point_array,
+                        raw_mask = raw_mask_array,
+                        img = img_array,
+                        afford = afford_array,
+                        pose = pose_array)
 
             total += len(state_array)
             state_arrays.append(state_array)

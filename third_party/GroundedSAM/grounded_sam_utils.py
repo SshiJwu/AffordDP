@@ -10,14 +10,14 @@ import sys
 sys.path.append("./vision")
 
 # Grounding DINO
-import diffusion_policy_3d.vision.GroundedSAM.GroundingDINO.groundingdino.datasets.transforms as T
-from diffusion_policy_3d.vision.GroundedSAM.GroundingDINO.groundingdino.models import build_model
-from diffusion_policy_3d.vision.GroundedSAM.GroundingDINO.groundingdino.util import box_ops
-from diffusion_policy_3d.vision.GroundedSAM.GroundingDINO.groundingdino.util.slconfig import SLConfig
-from diffusion_policy_3d.vision.GroundedSAM.GroundingDINO.groundingdino.util.utils import clean_state_dict, get_phrases_from_posmap
+import third_party.GroundedSAM.GroundingDINO.groundingdino.datasets.transforms as T
+from third_party.GroundedSAM.GroundingDINO.groundingdino.models import build_model
+from third_party.GroundedSAM.GroundingDINO.groundingdino.util import box_ops
+from third_party.GroundedSAM.GroundingDINO.groundingdino.util.slconfig import SLConfig
+from third_party.GroundedSAM.GroundingDINO.groundingdino.util.utils import clean_state_dict, get_phrases_from_posmap
 
 # segment anything
-from diffusion_policy_3d.vision.GroundedSAM.segment_anything.segment_anything import (
+from third_party.GroundedSAM.segment_anything.segment_anything import (
     sam_model_registry,
     sam_hq_model_registry,
     SamPredictor
@@ -184,7 +184,7 @@ def inference_one_image(cam_image, model, predictor, box_threshold, text_thresho
 
     boxes_filt_np = boxes_filt.cpu().numpy()
     img_bbox = draw_multi_bbox(image_pil, boxes_filt_np, pred_phrases)
-    img_bbox.save(f"bbox.png")
+    # img_bbox.save(f"bbox.png")
 
     boxes_filt = boxes_filt.cpu()
     transformed_box = predictor.transform.apply_boxes_torch(boxes_filt, image.shape[:2])[:1,...].to(device)
@@ -228,7 +228,7 @@ def prepare_gsam_model(device):
     dir = os.getcwd()
     sam_checkpoint = f"{dir}/assets/ckpts/sam_vit_h_4b8939.pth"
     grounded_checkpoint = f"{dir}/assets/ckpts/groundingdino_swint_ogc.pth"
-    config = f"{dir}/3D-Diffusion-Policy/diffusion_policy_3d/vision/GroundedSAM/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
+    config = f"{dir}/third_party/GroundedSAM/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
 
     grounded_dino_model, sam_predictor = prepare_GroundedSAM_for_inference(
         sam_version=sam_version, sam_checkpoint=sam_checkpoint,

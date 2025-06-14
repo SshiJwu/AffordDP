@@ -25,9 +25,9 @@ def save_config(data, save_config_path):
 def parse_args():
     
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config_name', type=str, default='PullDrawer.yaml', help='Environment Cobfig Name')
-    parser.add_argument('--save_dir', type=str, default='record')
-    parser.add_argument('--obj_id', type=int, help='Gapartnet asset id')
+    parser.add_argument('--config_name', type=str, default='PullDrawer.yaml', help='environment config name')
+    parser.add_argument('--save_dir', type=str, default='record', help='the path where the expert demonstrations are stored')
+    parser.add_argument('--obj_id', type=int, default=47024, help='gapartnet asset id')
     parser.add_argument('--part_id', type=int, default=-1, help='select part to manipulation')
 
     args = parser.parse_args()
@@ -79,6 +79,7 @@ def collect_demo(args):
             if not os.path.exists(save_root):
                 os.makedirs(save_root)
                 success = gym.motion_planning(save_video=True, save_root=save_root, task_type=task_name)
+                
                 if not success:
                     shutil.rmtree(save_root)
                 else:
