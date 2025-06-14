@@ -144,7 +144,7 @@ def process_data(data_dir=None, save_dir=None, save_name=None, vis=False):
             pose_array = np.concatenate(pose_array,axis=0)
 
             afford_ = np.concatenate(afford_, axis=0)
-            afford_ = uniform_sampling(afford_, num=32)[np.newaxis,:,:]
+            afford_ = uniform_sampling(afford_, num=8)[np.newaxis,:,:]
 
             if vis:
                 afford_color = np.zeros_like(afford_[0])
