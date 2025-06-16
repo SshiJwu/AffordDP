@@ -354,9 +354,7 @@ class TrainDiffusionUnetHybridPointcloudWorkspace(BaseWorkspace):
         
         # configure env
         env_runner: BasePointcloudRunner
-        env_runner = hydra.utils.instantiate(
-            cfg.task.env_runner,
-            output_dir=self.output_dir)
+        env_runner = hydra.utils.instantiate(cfg.task.env_runner)
         assert isinstance(env_runner, BasePointcloudRunner)
         policy = self.model
         if cfg.training.use_ema:
@@ -366,11 +364,7 @@ class TrainDiffusionUnetHybridPointcloudWorkspace(BaseWorkspace):
 
         runner_log = env_runner.run(policy)
         
-      
-        cprint(f"---------------- Eval Results --------------", 'magenta')
-        for key, value in runner_log.items():
-            if isinstance(value, float):
-                cprint(f"{key}: {value:.4f}", 'magenta')
+
         
         
 

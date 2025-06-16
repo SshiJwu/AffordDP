@@ -1,6 +1,6 @@
-name: PullDrawer_dynamic_afford
+name: PullDrawer
 
-task_name: 
+task_name: PullDrawer
 
 shape_meta: &shape_meta
   # acceptable types: rgb, low_dim
@@ -18,17 +18,19 @@ shape_meta: &shape_meta
     shape: [9]
 
 env_runner:
-  _target_: afforddp.env_runner.DrawerManip_runner.DrawerManipRunner
-  n_eval: 10
+  _target_: afforddp.env_runner.CabinetManip_runner.CabinetManipRunner
+  n_eval: 3
   max_steps: 30
   n_obs_steps: ${n_obs_steps}
   n_action_steps: ${n_action_steps}
-  affordance: True
-  dynamic_affordance: True
-  task_name: PullDrawer
-  memory_path: /home/user/Downloads/NAS/GeneralDP/sim/multiple_object_sim
+  task_name: ${task_name}
+  data_dir: record
+  memory_dir: data/memory
+  output_dir: eval_results
   rl_device: 'cuda'
   config_path: afforddp/config/env/PullDrawer.yaml
+  object_id: 0
+  
 
 dataset:
   _target_: afforddp.dataset.Cabinet_afford_dataset.CabinetManipAffordDataset

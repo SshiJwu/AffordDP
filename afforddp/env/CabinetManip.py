@@ -1242,7 +1242,6 @@ class CabinetManipEnv():
                 # self.intervaledRandom_(cabinet_reset_pos_tensor, self.arti_reset_position_noise)
                 # self.intervaledRandom_(cabinet_reset_rot_tensor, self.arti_reset_rotation_noise)
                 self.cabinet_reset_pos_tensor = cabinet_reset_pos_tensor
-                
 
                 self.arti_reset_obj_pos_list.append(cabinet_reset_pos_tensor.cpu().detach().tolist())
                 self.arti_reset_obj_rot_list.append(cabinet_reset_rot_tensor.cpu().detach().tolist())

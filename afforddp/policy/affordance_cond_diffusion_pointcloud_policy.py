@@ -512,7 +512,7 @@ class AffordCondPointCloudPolicy(BasePointcloudPolicy):
         d = "cuda" if torch.cuda.is_available() else "cpu"
         dtype = torch.float32
         x_t = x_t.to(dtype)
-        chain = pk.build_serial_chain_from_urdf(open("/home/user/Downloads/GAPartNet/manipulation/assets/urdf/franka_description/robots/franka_panda.urdf").read(),"panda_hand")
+        chain = pk.build_serial_chain_from_urdf(open("assets/urdf/franka_description/robots/franka_panda.urdf").read(),"panda_hand")
         chain = chain.to(dtype=dtype, device=d)
 
         ret = chain.forward_kinematics(x_t,end_only=False)

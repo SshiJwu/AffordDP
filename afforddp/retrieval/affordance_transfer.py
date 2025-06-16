@@ -4,6 +4,8 @@ from afforddp.utils.vis import show_results, vis_point_cloud
 from afforddp.featurizer.utils.visualization import IMG_SIZE
 from PIL import Image
 import numpy as np
+import os
+import shutil
 
 def affordance_transfer(prompt, gym, memory_buffer, task_name, save_dir, vis_flag=True):
     
@@ -30,6 +32,12 @@ def affordance_transfer(prompt, gym, memory_buffer, task_name, save_dir, vis_fla
               - Source/target images with affordance points (always saved)
               - Source/target point clouds with affordance visualization (only if vis_flag=True))
     """
+    
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    else:
+        shutil.rmtree(save_dir)
+        os.makedirs(save_dir)
     
     retrieval_id_list = []
     proj = gym.cam_projs[0][0]
@@ -99,3 +107,5 @@ def affordance_transfer(prompt, gym, memory_buffer, task_name, save_dir, vis_fla
         retrieval_pc = np.concatenate((retrieval_afford, retrieval_afford_color), axis=1)
         vis_src_pc = np.concatenate((src_pc, retrieval_pc), axis=0)
         vis_point_cloud(vis_src_pc, name=f'{save_dir}/src_pc')
+        
+    return transfer_afford

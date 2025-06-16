@@ -1,6 +1,7 @@
 from afforddp.env.CabinetManip import CabinetManipEnv
 from afforddp.retrieval.retrieval_buf import RetrievalBuf
 from afforddp.gym_util.utils import read_yaml_config
+from afforddp.utils.seed import set_seed
 from afforddp.retrieval.affordance_transfer import affordance_transfer
 import argparse
 import os
@@ -12,6 +13,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_name', type=str, default='PullDrawer.yaml', help='Environment Cobfig Name')
     parser.add_argument('--obj_id', type=int, default=45290, help='Gapartnet asset id')
+    parser.add_argument('--seed', type=int, default=43)
     parser.add_argument('--part_id', type=int, default=-1, help='select part to manipulation')
     parser.add_argument('--data_dir', type=str, default='record', help='expert demonstration data directory')
     parser.add_argument('--memory_dir', type=str, default='data/memory', help='memory file directory')
@@ -21,6 +23,8 @@ def parse_args():
     return args
 
 def run_demo(args):
+    
+    set_seed(args.seed)
     
     task_name = args.config_name.split(".")[0]
     if not task_name in ['PullDrawer', 'OpenDoor']:

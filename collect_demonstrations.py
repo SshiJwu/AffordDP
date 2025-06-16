@@ -1,4 +1,5 @@
 from afforddp.env.CabinetManip import CabinetManipEnv
+from afforddp.utils.seed import set_seed
 import numpy as np
 from afforddp.gym_util.utils import read_yaml_config
 import torch
@@ -26,15 +27,18 @@ def parse_args():
     
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_name', type=str, default='PullDrawer.yaml', help='environment config name')
-    parser.add_argument('--save_dir', type=str, default='record', help='the path where the expert demonstrations are stored')
+    parser.add_argument('--save_dir', type=str, default='record_test', help='the path where the expert demonstrations are stored')
     parser.add_argument('--obj_id', type=int, default=47024, help='gapartnet asset id')
     parser.add_argument('--part_id', type=int, default=-1, help='select part to manipulation')
+    parser.add_argument('--seed', type=int, default=43)
 
     args = parser.parse_args()
 
     return args
 
 def collect_demo(args):
+    
+    set_seed(args.seed)
     
     task_name = args.config_name.split(".")[0]
     if not task_name in ['PullDrawer', 'OpenDoor']:

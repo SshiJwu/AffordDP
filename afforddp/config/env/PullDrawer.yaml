@@ -66,12 +66,12 @@ asset:
     arti_obj_pose_ps: 
       - [0.6, 0.1, 0.6]
     arti_reset_position_noise: 0.01
-    arti_reset_rotation_noise: 0.0 #collect_data = 0.05 | eval = 0.02  
+    arti_reset_rotation_noise: 0.0 
     arti_obj_scale: 0.5 
     arti_rotation: 0
     arti_seg_id: 4
-    arti_pos_low: [0.55, 0, 0.72]
-    arti_pos_upper: [0.60, 0.1, 0.80]
+    arti_pos_low: [0.55, 0, 0.45]
+    arti_pos_upper: [0.60, 0.1, 0.55]
 
   table:
     table_pose_p: [0.7, 0, 0.01]
@@ -83,8 +83,8 @@ asset:
     franka_pose_p: [-0.08, 0, 0] 
     franka_seg_id: 5
     franka_reset_position_noise: 0.025
-    franka_reset_rotation_noise: 0.025
-    franka_reset_dof_pos_interval: 0.0 
+    franka_reset_rotation_noise: 0
+    franka_reset_dof_pos_interval: 0.025 
     franka_init_dof: [1.157, -1.066, -0.155, -2.239, -1.841, 1.003, 0.469]
 
     franka_pos_low: [-0.1, 0, 0]
