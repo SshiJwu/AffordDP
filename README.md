@@ -93,7 +93,7 @@ assets/
 ```
 
 ### 🛠️ Quick Start
-#### Expert Demonstration Collection
+#### Expert Demonstration Collection  <a id="expert-demonstration-collection"></a>
 You could generate demonstrations by yourself using our provided expert policies. Generated demonstrations are under `$YOUR_DATA_SAVE_PATH`. Default save path is `record`.
 ```bash
 python collect_demonstrations.py --save_dir $YOUR_DATA_SAVE_PATH --object_id $GAPartNet_obj_id --part_id $Manip_Part_id 
@@ -127,6 +127,7 @@ sh train.sh ${seed} ${cuda_id}
 sh eval.sh ${ckpt_path} ${object_id}
 ```
 #### Affordance Transfer Demo
+Before running this demo, you must collect and process the required data. Please follow [this](#expert-demonstration-collection).
 ```bash
 python demo.py
 ```
