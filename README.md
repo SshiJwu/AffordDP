@@ -19,7 +19,7 @@
   - [Install GroundedSAM](#install-groundedsam)
   - [Install Point_SAM](#install-point_sam)
   - [Install IsaacGym](#install-isaacgym)
-- [📚 Asset Preparation](#-asset-preparation)
+- [📦 Asset Preparation](#-asset-prepartion)
 - [🛠️ Quick Start](#️-quick-start)
   - [Expert Demonstration Collection](#expert-demonstration-collection)
   - [Policy Training](#policy-training)
@@ -82,7 +82,7 @@ pip install -e .
 cd examples
 python joint_monkey.py
 ```
-### 📚 Asset Prepartion
+### 📦 Asset Prepartion
 You need to prepare the gapartnet assets. For download instructions, please follow this [link](https://github.com/PKU-EPIC/GAPartNet). Put them to `asset/partnet_mobility_part`.
 ```text
 assets/
@@ -133,7 +133,7 @@ Before running this demo, you must collect and process the required data. Please
 python demo.py
 ```
 ### Acknowledgement
-Our code is generally built upon: [Diffusion Policy](https://github.com/real-stanford/diffusion_policy), [DP3](https://github.com/YanjieZe/3D-Diffusion-Policy), [RAM](https://github.com/yxKryptonite/RAM_code).  We thank all these authors for their nicely open sourced code and their great contributions to the community.
+Our code is generally built upon: [Diffusion Policy](https://github.com/real-stanford/diffusion_policy), [DP3](https://github.com/YanjieZe/3D-Diffusion-Policy), [RAM](https://github.com/yxKryptonite/RAM_code), [GAPartNet](https://github.com/PKU-EPIC/GAPartNet).  We thank all these authors for their nicely open sourced code and their great contributions to the community.
 
 ### 📚 Citation
 
