@@ -26,6 +26,7 @@
   - [Policy Evaluation](#policy-evaluation)
   - [Affordance Transfer Demo](#affordance-transfer-demo)
 - [📚 Citation](#-citation)
+- [Acknowledgement](#acknowledgement)
 
 ### ⚙️ Setup
 
@@ -131,8 +132,8 @@ Before running this demo, you must collect and process the required data. Please
 ```bash
 python demo.py
 ```
-
-
+### Acknowledgement
+Our code is generally built upon: [Diffusion Policy](https://github.com/real-stanford/diffusion_policy), [DP3](https://github.com/YanjieZe/3D-Diffusion-Policy), [RAM](https://github.com/yxKryptonite/RAM_code).  We thank all these authors for their nicely open sourced code and their great contributions to the community.
 
 ### 📚 Citation
 
