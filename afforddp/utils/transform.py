@@ -4,7 +4,217 @@ sys.path.append(os.getcwd())
 import numpy as np
 import open3d as o3d
 import fpsample
-from third_party.Point_SAM.demo.utils import preprocess_point_cloud, execute_global_registration, execute_fast_global_registration, refine_registration, decompose_transformation
+from scipy.linalg import polar
+import h5py
+from plyfile import PlyData, PlyElement
+
+
+def preprocess_point_cloud(pcd, voxel_size=0.05):
+    print(":: Downsample with a voxel size %.3f." % voxel_size)
+    pcd_down = pcd.voxel_down_sample(voxel_size)
+
+    radius_normal = voxel_size * 2
+    print(":: Estimate normal with search radius %.3f." % radius_normal)
+    pcd_down.estimate_normals(
+        o3d.geometry.KDTreeSearchParamHybrid(radius=radius_normal, max_nn=30))
+
+    radius_feature = voxel_size * 5
+    print(":: Compute FPFH feature with search radius %.3f." % radius_feature)
+    pcd_fpfh = o3d.pipelines.registration.compute_fpfh_feature(
+        pcd_down,
+        o3d.geometry.KDTreeSearchParamHybrid(radius=radius_feature, max_nn=100))
+    return pcd_down, pcd_fpfh
+
+def execute_global_registration(source_down, target_down, source_fpfh,
+                                target_fpfh, voxel_size):
+    distance_threshold = voxel_size * 1.5
+    print(":: RANSAC registration on downsampled point clouds.")
+    print("   Since the downsampling voxel size is %.3f," % voxel_size)
+    print("   we use a liberal distance threshold %.3f." % distance_threshold)
+    result = o3d.pipelines.registration.registration_ransac_based_on_feature_matching(
+        source_down, target_down, source_fpfh, target_fpfh, True,
+        distance_threshold,
+        o3d.pipelines.registration.TransformationEstimationPointToPoint(False),
+        3, [
+            o3d.pipelines.registration.CorrespondenceCheckerBasedOnEdgeLength(
+                0.9),
+            o3d.pipelines.registration.CorrespondenceCheckerBasedOnDistance(
+                distance_threshold)
+        ], o3d.pipelines.registration.RANSACConvergenceCriteria(100000, 0.999))
+    return result
+
+def execute_fast_global_registration(source_down, target_down, source_fpfh,
+                                     target_fpfh, voxel_size):
+    distance_threshold = voxel_size * 0.5
+    print(":: Apply fast global registration with distance threshold %.3f" \
+            % distance_threshold)
+    result = o3d.pipelines.registration.registration_fgr_based_on_feature_matching(
+        source_down, target_down, source_fpfh, target_fpfh,
+        o3d.pipelines.registration.FastGlobalRegistrationOption(
+            maximum_correspondence_distance=distance_threshold))
+    return result
+
+def refine_registration(source, target, source_fpfh, target_fpfh, voxel_size, result_init):
+    distance_threshold = voxel_size * 0.4
+    print(":: Point-to-plane ICP registration is applied on original point")
+    print("   clouds to refine the alignment. This time we use a strict")
+    print("   distance threshold %.3f." % distance_threshold)
+    result = o3d.pipelines.registration.registration_icp(
+        source, target, distance_threshold, result_init,
+        # source, target, distance_threshold, result_init.transformation,
+        o3d.pipelines.registration.TransformationEstimationPointToPlane())
+    return result
+
+def decompose_transformation(T):
+    np.set_printoptions(precision=3, suppress=True)
+    T = np.array(T)
+    R = T[0:3, 0:3]
+    t = T[0:3, 3]
+    return R, t
+
+
+def load_ply(filename):
+    with open(filename, "r") as rf:
+        while True:
+            try:
+                line = rf.readline()
+            except:
+                raise NotImplementedError
+            if "end_header" in line:
+                break
+            if "element vertex" in line:
+                arr = line.split()
+                num_of_points = int(arr[2])
+
+        # print("%d points in ply file" %num_of_points)
+        points = np.zeros([num_of_points, 6])
+        for i in range(points.shape[0]):
+            point = rf.readline().split()
+            assert len(point) == 6
+            points[i][0] = float(point[0])
+            points[i][1] = float(point[1])
+            points[i][2] = float(point[2])
+            points[i][3] = float(point[3])
+            points[i][4] = float(point[4])
+            points[i][5] = float(point[5])
+    rf.close()
+    del rf
+    return points
+
+def sample_point_cloud(point, num_points):
+
+    samples_idx = fpsample.bucket_fps_kdline_sampling(point[:,:3], num_points, h=7)
+    point = point[samples_idx]
+
+    return point
+
+
+def draw(pcd, name, values=None, contact_point=None):
+    # Define each point as a tuple: necessary for the PlyElement.
+    if values is None:
+        vertex_list = [
+                (pcd[i][0], pcd[i][1], pcd[i][2], 255, 255, 255)
+                for i in range(pcd.shape[0])
+            ]
+        if contact_point is not None:
+            vertex_list.append((*contact_point, 255, 0, 255))
+        vertex = np.array(vertex_list, dtype=[
+                ("x", "f4"),
+                ("y", "f4"),
+                ("z", "f4"),
+                ("red", "u1"),
+                ("green", "u1"),
+                ("blue", "u1"),
+            ])
+    elif len(values.shape) >= 2:
+        vertex = np.array(
+            [
+                (pcd[i][0], pcd[i][1], pcd[i][2], int(values[i][0]), int(values[i][1]), int(values[i][2]))
+                for i in range(pcd.shape[0])
+            ],
+            dtype=[
+                ("x", "f4"),
+                ("y", "f4"),
+                ("z", "f4"),
+                ("red", "u1"),
+                ("green", "u1"),
+                ("blue", "u1"),
+            ],
+        )
+    else:
+        colors = np.zeros((values.shape[0], 3))
+        
+        if max(values) != 0:
+            values = values / max(values)
+        
+        for i in range(colors.shape[0]):
+            v = values[i]
+            if v == 0:
+                colors[i] = [255, 255, 255]
+            else:
+                colors[i] = [int(v * 255), 0, int((1 - v) * 255)]
+                
+        vertex_list = [
+                (pcd[i][0], pcd[i][1], pcd[i][2], *(colors[i]))
+                for i in range(pcd.shape[0])
+            ]
+        if contact_point is not None:
+            vertex_list.append((*contact_point, 255, 0, 255))
+        vertex = np.array(vertex_list, dtype=[
+                ("x", "f4"),
+                ("y", "f4"),
+                ("z", "f4"),
+                ("red", "u1"),
+                ("green", "u1"),
+                ("blue", "u1"),
+            ]
+        )
+    
+    breakpoint()
+    el = PlyElement.describe(vertex, "vertex")
+    PlyData([el], text=True).write(f"vis/{name}.ply")
+
+def rgbd_to_point_cloud(rgb_image_np, depth_image_np, width, height, fx, fy, cx, cy):
+    # Load RGB and Depth images
+    # For this example, let's assume you have RGB and Depth images as numpy arrays
+    # rgb_image_np = <your RGB image as numpy array>
+    # depth_image_np = <your Depth image as numpy array>
+
+    # Convert numpy arrays to Open3D images
+    rgb_image_o3d = o3d.geometry.Image(rgb_image_np)
+    depth_image_o3d = o3d.geometry.Image(depth_image_np)
+
+    # Create an RGBD image from the RGB and Depth images
+    rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(
+        rgb_image_o3d, depth_image_o3d
+    )
+
+    intrinsic = o3d.camera.PinholeCameraIntrinsic(
+        width=width, height=height, fx=fx, fy=fy, cx=cx, cy=cy
+    )
+
+    # Convert the RGBD image to a point cloud
+    point_cloud = o3d.geometry.PointCloud.create_from_rgbd_image(rgbd_image, intrinsic)
+
+    # Optionally visualize the point cloud
+    # o3d.visualization.draw_geometries([point_cloud])
+
+    return np.array(point_cloud.points), np.array(point_cloud.colors)
+
+
+def rotateMatrixToEulerAnglesInRadian(RM):
+    theta_z = np.arctan2(RM[1, 0], RM[0, 0])
+    theta_y = np.arctan2(-1 * RM[2, 0], np.sqrt(RM[2, 1] * RM[2, 1] + RM[2, 2] * RM[2, 2]))
+    theta_x = np.arctan2(RM[2, 1], RM[2, 2])
+    print(f"Euler angles:\ntheta_x: {theta_x}\ntheta_y: {theta_y}\ntheta_z: {theta_z}")
+    return theta_x, theta_y, theta_z
+
+def rotateMatrixToEulerAnglesInDegree(RM):
+    theta_z = np.arctan2(RM[1, 0], RM[0, 0]) / np.pi * 180
+    theta_y = np.arctan2(-1 * RM[2, 0], np.sqrt(RM[2, 1] * RM[2, 1] + RM[2, 2] * RM[2, 2])) / np.pi * 180
+    theta_x = np.arctan2(RM[2, 1], RM[2, 2]) / np.pi * 180
+    print(f"Euler angles:\ntheta_x: {theta_x}\ntheta_y: {theta_y}\ntheta_z: {theta_z}")
+    return theta_x, theta_y, theta_z
 
 def ICP_register(part1, part2, voxel_size=0.05, init="ransac"):
     """
