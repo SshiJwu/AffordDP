@@ -21,7 +21,6 @@ from afforddp.retrieval.affordance_transfer import affordance_transfer
 from afforddp.utils.vision_model import run_pointsam, run_sam, scale_img_pixel, transfer_pixel
 from afforddp.utils.transform import get_image_pixel_from_3d, sample_point_cloud, find_nearest_object_pixel_in_box, get_3d_from_image_pixel, ICP_register,  update_afford
 from afforddp.utils.vis import show_results, vis_point_cloud 
-from third_party.Point_SAM.demo.utils import draw
 import shutil
 from datetime import datetime
 
